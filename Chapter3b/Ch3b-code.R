@@ -1,7 +1,7 @@
 ##########################################################################
 #
 #
-# R-code for Ch.~3a: One-way Analysis of Variance
+# R-code for Ch.~3b: One-way Analysis of Variance
 #
 #
 ##########################################################################
@@ -43,6 +43,7 @@ Gamma <- t(taus) %*% C
 # associated t-statistic --- note: 5 observation in each group
 Ts <- Gamma / sqrt(sigma(anova_result)^2 * (1/5 + 1/5))
 # p-values (in percent)
+k <- length(unique(power_setting))
 pvals <- 2*(1-pt(abs(Ts), df = length(etchrate) - k)) * 100
 # compute upper and lower confidence limits 
 se <- sqrt(sigma(anova_result)^2 * (1/5 + 1/5))
@@ -64,3 +65,32 @@ print(crit_bon)
 
 # compute critical value when using Tukey's method 
 qtukey(0.95, nmeans = k, df = length(etchrate) - k)/sqrt(2)
+
+
+### Matrix representations 
+
+# design matrix for a four-level factor, using a sum-to-zero constraint
+# on the treatment effects.  
+M <- matrix(nrow = 4, ncol = 4, data = c(1,1,0,0,
+                                         1,0,1,0,
+                                         1,0,0,1,
+                                         1,-1,-1,-1), byrow = TRUE)
+Minv <- solve(M) # returns matrix inverse
+Minv %*% M # check if result is identity 
+M %*% Minv
+
+# returns linear model design matrix 
+X <- model.matrix(anova_result)
+betahat <- coef(anova_result)
+
+# reproduce bethat using matrix algebra
+y <- anova_result$model$etchrate
+XtX <- crossprod(X)
+Xty <- crossprod(X, y)
+betahat_ma <- solve(XtX, Xty) # preferred over: solve(XtX) %*% Xty because of better numerical properties 
+print(betahat)
+print(betahat_ma) # identical. 
+
+# To find the variance covariance matrix:
+sigma(anova_result)^2 * solve(XtX) # according to formula on slide
+zapsmall(vcov(anova_result)) # same result using the 'vcov' function in R
