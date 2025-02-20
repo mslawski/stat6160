@@ -46,7 +46,7 @@ k * sum(Q_i^2)/(lambda * t)
 
 tau_i <- k * Q_i / (lambda * t)
 print(tau_i)
-coef(lm_res)
+coef(anova_result)
 
 
 # Non-orthogonality of treatment and blocks
@@ -58,13 +58,6 @@ crossprod(X)
 
 # by comparison in case of a complete block design, treatments and block factors are orthogonal. As a result,
 # the treatment effects and block effects can be estimated/tested independently.
-
-# !!! Because of lack of orthogonality, there is not a single canonical way of generating SS decompositions.
-# For example, if we change the order of the terms in the LS decomposition, the SS decomposition becomes different:
-
-anova_result2 <- aov(response ~ compound + tire, data = data) 
-print(anova_result2) #! note the changes in the output
-summary(anova_result2) #! note the changes in the output
 
 # This is a useful package for generating various standard designs:  
 library(AlgDesign)
@@ -79,6 +72,46 @@ crossprod(Xcomplete)
 # we see that the the X' X matrix is block diagonal
 # (and thus the covariance of the coefficients (X' X)^{-1} is block diagonal as well). 
 
+				    
+# !!! Because of lack of orthogonality, there is not a single canonical way of generating SS decompositions.
+# For example, if we change the order of the terms in the LS decomposition, the SS decomposition becomes different:
+
+anova_result2 <- aov(response ~ compound + tire, data = data) 
+print(anova_result2) #! note the changes in the output
+summary(anova_result2) #! note the changes in the output
+
+# ASIDE -- by default, the ANOVA function in R computes sequential 
+# sums of squares and associated test, i.e., term-by-term in the sequence they are entered.  
+# For example, in the output of anova_result2, we compare
+#
+# SS(1) | SS(1 + compound)
+# SS(1 + compound + tire) | SS(compound) 
+#
+# This is not of interest in our case --- we compare the reduction in 
+# SS achieved by the variable "compound" relative to the intercept model), then the reduction in SS achieved by tire relative to the compound + intercept model. 
+# Instead, we are interested in the opposite sequence 
+# SS(1) | SS(1 + tire)
+# SS(1 + tire + compound) | SS(tire)
+#
+# since "tire" is not the term of primary interest but a simply a term we would to account for.
+#
+# The use of the drop1() function is more symmetric, it compares the increase in SS after 
+# dropping each term
+drop1(anova_result, test = "F")
+drop1(anova_result2, test = "F")
+
+# Alternatively, we may use the 'Anova' function in the 'car' package.
+library(car)
+Anova(anova_result, type = 2) # type 2 means "type 2" (i.e., *partial* sum of squares)
+Anova(anova_result, type = "II") # equivalent to previous
+Anova(anova_result2, type = "II") # again, equivalent.
+
+# Note that for balanced designs (such as the complete block design and LSD), 
+# the sequence in which terms are added into the model does *NOT* matter:  
+# Sequential (type1) SS and partial (type2) SS will coincide. For unbalanced 
+# designs (such as BIBD), we need to be more careful since by default R 
+# return type 1 SS, which may not be of interest (depending on the sequence 
+# in which terms are entered). 
 
 ### pair-wise comparisons:  
 
@@ -109,7 +142,7 @@ p <- 4
 ls4design <- design.lsd(letters[1:4], seed = 23)
 print(ls4design)
 
-### [2] Incomplete Block Designs 
+### [2] Incomplete Block Designs (using the 'Algdesign' package)
 
 # generate BIBD as in the tire example 
 b <- 4
@@ -150,4 +183,7 @@ block_assignments_m[i,unlist(block_assignments[[i]])] <- 1
 print(block_assignments_m)
 
 # every pair occurs exactly once
+pairs <- expand.grid(1:t, 1:t)
+pairs <- pairs[pairs[,1] > pairs[,2], ]
+
 apply(pairs, 1, function(z) sum(rowSums(block_assignments_m[,c(z[1], z[2])]) == 2))
