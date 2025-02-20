@@ -142,7 +142,7 @@ p <- 4
 ls4design <- design.lsd(letters[1:4], seed = 23)
 print(ls4design)
 
-### [2] Incomplete Block Designs (using the 'Algdesign' package)
+### [2] Incomplete Block Designs (using the 'AlgDesign' package)
 
 # generate BIBD as in the tire example 
 b <- 4
