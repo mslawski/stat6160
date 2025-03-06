@@ -45,6 +45,14 @@ print(anova_result1)
 X1 <- model.matrix(anova_result1)
 X1tX1 <- crossprod(X1) # computes the crossproduct t(X1) %*% X1 
 
+### we could change both factors to reference coding as follows:
+
+Xref <- model.matrix(~type * temperature, data = data,
+                    contrasts = list(type = "contr.treatment", temperature = "contr.treatment"))
+
+# print(Xref)
+# crossprod(Xref)       
+
 ### compare parameter estimates  
 
 # intercept: 
