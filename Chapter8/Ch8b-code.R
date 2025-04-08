@@ -85,10 +85,10 @@ aov1_sum <- unlist(summary(aov1))
 
 # estimation of variance components (again, assuming random effects)
 
-sigmabetasq_hat <- (aov0_sum["Mean Sq2"] - sigmasq_hat)/(a * n)
-sigmatausq_hat <- (aov0_sum["Mean Sq1"] - sigmasq_hat)/(b * n)
+sigmabetasq_hat <- (aov1_sum["Mean Sq2"] - sigmasq_hat)/(a * n)
+sigmatausq_hat <- (aov1_sum["Mean Sq1"] - sigmasq_hat)/(b * n)
 
-# F-tests are the same as in the fixed facotr w/ main effects model
+# F-tests are the same as in the fixed factor w/ main effects model
 
 ################################################################################################
 
