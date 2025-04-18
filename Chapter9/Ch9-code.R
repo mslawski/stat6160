@@ -90,7 +90,7 @@ anova(ancova3)
 xA <- x * (treatment == "A")
 xB <- x * (treatment == "B")
 
-# -1 on the right hand side of the model formula: drop global intercept
+#
 ancova4 <- lm(y ~ xA + xB  + treatment, contrasts = list(treatment = "contr.treatment"), data = data) 
 summary(ancova4)
 anova(ancova4)
